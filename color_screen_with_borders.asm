@@ -1,6 +1,6 @@
 .data
-	li $s0,0 # huidig rij nummer
-	li $s1,0 # huidig kolom nummer 
+	li $s0,0 # teller zoveelste
+	li $s1,0 
 	#rijnummer a0
 	#kolomnummer a1
 
@@ -10,7 +10,7 @@ main:
 	
 	li $s3, 0x00ff0000      #Loading RED in register t1
 	
-	j colour_row
+	j fill_background
     	
     	
 coord_to_adress: 
@@ -52,6 +52,7 @@ colour_1:
     	sw $s1, -12($fp)
     	
     	jal coord_to_adress
+    	
     	sw $s3 , 0($s2)
     	
     	
@@ -65,56 +66,31 @@ colour_1:
     	jr $ra	
 
 
-colour_row:
+
+
+
+	
+fill_background:
 # stack frame
-    	sw $fp, 0($sp) # push old frame pointer (dynamic link)
-    	move $fp, $sp # frame pointer now points to the top of the stack
-    	subu $sp, $sp, 16 # allocate 16 bytes on the stack
+	sw $fp, 0($sp) # push old frame pointer (dynamic link)
+	move $fp, $sp # frame pointer now points to the top of the stack
+	subu $sp, $sp, 16 # allocate 16 bytes on the stack
     	sw $ra, -4($fp) # store the value of the return address
     	sw $s0, -8($fp) # save locally used registers
     	sw $s1, -12($fp)
     	
-    	
-	bge $s0,15,exit #for huidige rij groter dan aanatl rijen ga naar exit
-	beq $s0,0, colour_kolom
-	addi $s0,$s0,1
-	li $s1,0
-	j colour_kolom
-	j colour_row	
-	
-    	# stack frame     
+	bgt $s1,512,exit #for huidige kolom groter dan aantal kolommen terug loop opnieuw
+	jal colour_1
+	addi $s1,$s1,1
+	j fill_background
+		
+	# stack frame     
     	lw $s1, -12($fp) # reset saved register $s1
     	lw $s0, -8($fp) # reset saved register $s0
     	lw $ra, -4($fp) # get return address from frame
     	move $sp, $fp # get old frame pointer from current fra
     	lw $fp, ($sp) # restore old frame pointer
     	jr $ra	
-
-
-
-	
-	
-	colour_kolom:
-		# stack frame
-    		sw $fp, 0($sp) # push old frame pointer (dynamic link)
-    		move $fp, $sp # frame pointer now points to the top of the stack
-    		subu $sp, $sp, 16 # allocate 16 bytes on the stack
-    		sw $ra, -4($fp) # store the value of the return address
-    		sw $s0, -8($fp) # save locally used registers
-    		sw $s1, -12($fp)
-    	
-		bgt $s1,32,colour_row #for huidige kolom groter dan aantal kolommen terug loop opnieuw
-		jal colour_1
-		addi $s1,$s1,1
-		j colour_kolom
-		
-		# stack frame     
-    		lw $s1, -12($fp) # reset saved register $s1
-    		lw $s0, -8($fp) # reset saved register $s0
-    		lw $ra, -4($fp) # get return address from frame
-    		move $sp, $fp # get old frame pointer from current fra
-    		lw $fp, ($sp) # restore old frame pointer
-    		jr $ra	
 
 
 exit: 
