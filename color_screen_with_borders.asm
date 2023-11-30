@@ -19,7 +19,8 @@ loop_rijen:
 	
 	
 loop_kolom:
-	bgt $s1,31,loop_rijen	#als kolom groter dan 31 terug naar loop_rijen
+	bgt $s1,31,loop_rijen
+	jal check_colour	#als kolom groter dan 31 terug naar loop_rijen
 	jal fill_colour
 	addi $s1,$s1,1
 	j loop_kolom
@@ -72,9 +73,23 @@ coord_to_adress:
     
      
 
-
-
-
+check_colour:
+    	sw $ra, -4($fp) # store the value of the return address
+    	
+    	
+    	beq $s0,0,set_yellow
+    	beq $s1,0,set_yellow
+    	beq $s0,15,set_yellow
+    	beq $s1,31,set_yellow
+    	
+    	
+set_red:
+	li $s3, 0x00ff0000      #Loading RED in register t1
+    	jr $ra
+    	
+set_yellow:
+	li $s3, 0x00ffff00      #Loading yellow in register t1
+    	jr $ra
 
 exit: 
 #einde programme
